@@ -26,23 +26,30 @@
     try {
       let name = "";
       let wishlistCount = 0;
-      let cartCount=0
-      // First get all listed categories
-      const categories = await category.find({isListed:true});
-      
-      // Get only the category IDs that are listed
-      const listedCategoryIds = categories.map(cat => cat._id);
-      
-      // Find products that are listed, not deleted, and belong to listed categories
-      const products = await product.find({
-        isListed: true,
-        isDeleted: false,
-        productCategoryId: { $in: listedCategoryIds }
-      }).sort({ createdAt: -1 }).limit(5);
+      let cartCount = 0;
+      let categories = [];
+      let products = [];
 
-      if (req.session.loginSession || req.session.signupSession) {
+      try {
+        categories = await category.find({ isListed: true });
+        const listedCategoryIds = categories.map(cat => cat._id);
+        products = await product.find({
+          isListed: true,
+          isDeleted: false,
+          productCategoryId: { $in: listedCategoryIds }
+        }).sort({ createdAt: -1 }).limit(5);
+      } catch (dbErr) {
+        console.error("Home DB query error (Check MONGODB_URI and Atlas IP Whitelist):", dbErr.message);
+      }
+
+      if (req.session && (req.session.loginSession || req.session.signupSession)) {
         const userEmail = req.session.email;
-        const userVer = await usercollection.findOne({ email: userEmail });
+        let userVer = null;
+        try {
+          if (userEmail) userVer = await usercollection.findOne({ email: userEmail });
+        } catch (uErr) {
+          console.error("User query error:", uErr.message);
+        }
         
         if (userVer) {
           req.session.otpSession = false;
@@ -50,19 +57,18 @@
             return res.redirect("/blocked");
           } else {
             name = userVer.name;
-            wishlistCount = await wishlist.countDocuments({ userId: userVer._id })
-            cartCount = await cart.countDocuments({ userId: userVer._id })
-            return res.render("home", { name, products, categories,wishlistCount,cartCount});
+            try {
+              wishlistCount = await wishlist.countDocuments({ userId: userVer._id });
+              cartCount = await cart.countDocuments({ userId: userVer._id });
+            } catch (cErr) {}
+            return res.render("home", { name, products, categories, wishlistCount, cartCount });
           }
-        } else {
-          return res.render("home", { name, products, categories,wishlistCount });
         }
-      } else {
-        return res.render("home", { name, products, categories,wishlistCount });
       }
+      return res.render("home", { name, products, categories, wishlistCount });
     } catch (error) {
-      console.log("Homepage error:", error);
-    next(new AppError('Sorry...Something went wrong', 500));
+      console.error("Homepage critical rendering error:", error);
+      next(new AppError('Sorry...Something went wrong', 500));
     }
   };
 

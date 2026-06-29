@@ -51,10 +51,11 @@ app.use("/",userRouter)
 app.use("/admin",adminRouter)
 
 app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500
-  const errorMessage = err.message || 'Internal Server Error'
-  res.status(statusCode).render('errorPage', { statusCode, errorMessage })
-})
+  console.error("EXPRESS ERROR HANDLER:", err);
+  const statusCode = err.statusCode || 500;
+  const errorMessage = err.message || 'Internal Server Error';
+  res.status(statusCode).render('errorPage', { statusCode, errorMessage });
+});
 
 app.use((req, res) => {
   res.status(404).render('page-404')
