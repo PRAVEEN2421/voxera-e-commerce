@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="icon" href="/img/icon.png" type="image/png" />
+    <!-- Added Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .sidebar {
+            background-color: #2d2b2b;
+            color: white;
+            width: 80px;
+            height: 100vh;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            z-index: 1000;
+        }
+
+        .sidebar.expanded {
+            width: 240px;
+        }
+
+        .logo {
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-full {
+            max-height: 60px;
+            max-width: 200px;
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-icon {
+            max-height: 40px;
+            max-width: 40px;
+        }
+
+        .sidebar.expanded .logo-full {
+            display: block;
+        }
+
+        .sidebar.expanded .logo-icon {
+            display: none;
+        }
+
+        .menu {
+            margin-top: 20px;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            white-space: nowrap;
+        }
+
+        .menu-item:hover {
+            background-color: #34495e;
+        }
+
+        .menu-item.active {
+            background-color: #00fffb;
+            border-left: 4px solid #fff;
+        }
+
+        .menu-item.active a {
+            color: #000000;
+            font-weight: bold;
+        }
+
+    
+
+        .menu-item a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .menu-item:hover a {
+            color: white;
+        }
+
+        .icon {
+            font-size: 18px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .menu-text {
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .menu-text {
+            opacity: 1;
+        }
+
+        .toggle-menu {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #000000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 1001;
+            display: none;
+        }
+
+        /* .content-wrapper {
+            flex: 1;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+            margin-left: 80px;
+            width: calc(500% - 80px);
+        } */
+
+        /* Responsive adjustments */
+        @media (min-width: 992px) {
+            .sidebar:hover {
+                width: 240px;
+            }
+
+            .sidebar:hover .logo-full {
+                display: block;
+            }
+
+            .sidebar:hover .logo-icon {
+                display: none;
+            }
+
+            .sidebar:hover .menu-text {
+                opacity: 1;
+            }
+/* 
+            .content-wrapper {
+                margin-left: 50px;
+                width: calc(100% - 80px);
+            } */
+
+            .sidebar.expanded + .content-wrapper {
+                margin-left: 240px;
+                width: calc(100% - 240px);
+            }
+        }
+
+        @media (max-width: 991px) {
+            .toggle-menu {
+                display: block;
+            }
+
+            .sidebar {
+                width: 0;
+                height: 100vh;
+                transition: width 0.3s ease;
+            }
+
+            .sidebar.expanded {
+                width: 130px;
+            }
+
+            /* .content-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 70px; 
+            } */
+        }
+
+        /* Overlay for mobile when sidebar is open */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        @media (max-width: 991px) {
+            body.sidebar-active .sidebar-overlay {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="toggle-menu" id="toggleMenu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <img src="/img/icon.png" alt="" class="logo-icon">
+            <img src="/img/footer-logo.png" alt="" class="logo-full">
+        </div>
+        <ul class="menu">
+            <li class="menu-item" data-path="/admin/dashboard">
+                <a href="/admin/dashboard">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item" data-path="/admin/products">
+                <a href="/admin/products">
+                    <span class="icon"><i class="fas fa-shopping-bag"></i></span>
+                    <span class="menu-text">Products</span>
+                </a>
+            </li>
+            <li class="menu-item" data-path="/admin/users">
+                <a href="/admin/users">
+                    <span class="icon"><i class="fas fa-user"></i></span>
+                    <span class="menu-text">Users</span>
+                </a>
+            </li>
+            <li class="menu-item" data-path="/admin/category">
+                <a href="/admin/category">
+                    <span class="icon"><i class="fas fa-list"></i></span>
+                    <span class="menu-text">Category</span>
+                </a>
+            </li>
+            <li class="menu-item" data-path="/admin/orders">
+                <a href="/admin/orders">
+                    <span class="icon"><i class="fas fa-shopping-cart"></i></span>
+                    <span class="menu-text">Orders</span>
+                </a>
+            </li>
+            <li class="menu-item" data-path="/admin/coupons">
+                <a href="/admin/coupons">
+                    <span class="icon"><i class="fas fa-ticket-alt"></i></span>
+                    <span class="menu-text">Coupons</span>
+                </a>
+            </li>
+            <li class="menu-item highlight" data-path="/admin/offers">
+                <a href="/admin/offers">
+                    <span class="icon"><i class="fas fa-tag"></i></span>
+                    <span class="menu-text">Offers</span>
+                </a>
+            </li>
+            <li class="menu-item" data-path="/admin/sales">
+                <a href="/admin/sales">
+                    <span class="icon"><i class="fas fa-chart-line"></i></span>
+                    <span class="menu-text">Sales</span>
+                </a>
+            </li>
+            <li class="menu-item" data-path="/admin/logout">
+                <a href="/admin/logout">
+                    <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                    <span class="menu-text">Sign out</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="content-wrapper" id="content">
+        <!-- Your page content goes here -->
+    </div>
+
+    <script>
+        // Toggle menu for all screens
+        document.getElementById('toggleMenu').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            
+            sidebar.classList.toggle('expanded');
+            body.classList.toggle('sidebar-active');
+        });
+
+        // Set active menu item based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            menuItems.forEach(item => {
+                const itemPath = item.getAttribute('data-path');
+                if (currentPath.includes(itemPath)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        });
+
+        // Close sidebar when clicking overlay on mobile
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            
+            sidebar.classList.remove('expanded');
+            body.classList.remove('sidebar-active');
+        });
+
+        // Adjust on window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            
+            if (window.innerWidth >= 992) {
+                // Reset for desktop view
+                body.classList.remove('sidebar-active');
+                // Optional: collapse expanded sidebar on resize to desktop
+                // sidebar.classList.remove('expanded');
+            }
+        });
+    </script>
+
+</body>
+</html>
