@@ -8,12 +8,19 @@ const db = require ("./config/db")
 const morgan = require ("morgan")
 const userRouter = require ("./routes/userRouter")
 const adminRouter = require ("./routes/adminRouter")
-db()    
+app.use(async (req, res, next) => {
+    try {
+        await db();
+    } catch (err) {
+        console.error("Async DB Middleware Error:", err);
+    }
+    next();
+});
  
 app.use(express.json()) 
 app.use(express.urlencoded({extended:true}))
 app.use(session({
-    secret:process.env.SESSION_SECRET, 
+    secret: process.env.SESSION_SECRET || 'voxerasupersecretkey123', 
     resave:false,  
     saveUninitialized:true, 
     cookie:{
